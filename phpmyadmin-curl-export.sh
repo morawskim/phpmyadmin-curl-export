@@ -25,6 +25,7 @@ http_password=
 use_http_auth=
 save_to=
 phpmyadmin_server=
+compression='none'
 cookie_path='/tmp/phpmyadmin-curl.cookies'
 headers_path='/tmp/phpmyadmin-curl.headers'
 response_path='/tmp/phpmyadmin-curl.response'
@@ -35,6 +36,8 @@ curl_save_response_path=$response_path
 
 function parse_arguments()
 {
+    local save_to_extension='sql'
+
     for i in "$@"
     do
         case $i in
@@ -78,6 +81,10 @@ function parse_arguments()
             phpmyadmin_help
             exit 0
             ;;
+        --compression)
+            compression='gzip'
+            save_to_extension="$save_to_extension.gz"
+            ;;
         *)
             # unknown option
             echo "Unkown option $i" >&2
@@ -91,7 +98,7 @@ function parse_arguments()
     fi
     
     if [ -z $save_to ]; then
-        save_to=$(date +"%F-$phpmyadmin_dbname.sql")
+        save_to=$(date +"%F-$phpmyadmin_dbname.$save_to_extension")
     fi
 }
 
@@ -224,7 +231,7 @@ post_params="$post_params&output_format=sendit"
 post_params="$post_params&filename_template=%40SERVER%40"
 post_params="$post_params&remember_template=on"
 post_params="$post_params&charset_of_file=utf-8"
-post_params="$post_params&compression=none"
+post_params="$post_params&compression=$compression"
 post_params="$post_params&maxsize="
 post_params="$post_params&what=sql"
 post_params="$post_params&codegen_structure_or_data=data"
@@ -294,7 +301,6 @@ curl "$phpmyadmin_host/export.php" \
     -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
     -H 'Accept-Language: en-US,en;q=0.5' \
     -k \
-    --compressed \
     $use_http_auth \
     $curl_dump_headers_option \
     -L \
