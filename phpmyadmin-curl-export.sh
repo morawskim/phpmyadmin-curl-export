@@ -26,6 +26,7 @@ use_http_auth=
 save_to=
 phpmyadmin_server=
 compression='none'
+add_drop_statement=
 cookie_path='/tmp/phpmyadmin-curl.cookies'
 headers_path='/tmp/phpmyadmin-curl.headers'
 response_path='/tmp/phpmyadmin-curl.response'
@@ -85,6 +86,9 @@ function parse_arguments()
             compression='gzip'
             save_to_extension="$save_to_extension.gz"
             ;;
+        --add-drop)
+            add_drop_statement='1'
+            ;;
         *)
             # unknown option
             echo "Unkown option $i" >&2
@@ -105,7 +109,7 @@ function parse_arguments()
 function phpmyadmin_help()
 {
     cat <<EOF
-Arguments: $0 [--help] [--auth-type=<cookie|basic>] [--http-basic-user=<apache_http_user>] [--http-basic-password=<apache_http_password>] [--phpmyadmin-user=<phpmyadmin_user>] [--phpmyadmin-password=<phpmyadmin_password>] [--phpmyadmin-server=<phpmyadmin_server>] [--dbname=<database>] [--host=<phpmyadmin_host>] [--save-to=<%F-\$dbname.sql>]
+Arguments: $0 [--help] [--auth-type=<cookie|basic>] [--http-basic-user=<apache_http_user>] [--http-basic-password=<apache_http_password>] [--phpmyadmin-user=<phpmyadmin_user>] [--phpmyadmin-password=<phpmyadmin_password>] [--phpmyadmin-server=<phpmyadmin_server>] [--dbname=<database>] [--host=<phpmyadmin_host>] [--save-to=<%F-\$dbname.sql>] [--compression] [--add-drop]
        --help: Print help
        --auth-type=<cookie|basic>: Method of authentication to phpMyAdmin 
        --http-basic-user=<apache_http_user>: Username for HTTP basic authentication
@@ -117,6 +121,7 @@ Arguments: $0 [--help] [--auth-type=<cookie|basic>] [--http-basic-user=<apache_h
        --host=<phpmyadmin_host>: PhpMyAdmin host
        --save-to=<%F-\$dbname.sql>: Output filename (support for date format controls eg. %F)
        --compression: Enable gzip compression
+       --add-drop: Add DROP TABLE / VIEW / PROCEDURE / FUNCTION / EVENT / TRIGGER statement
 
  Common uses: $0 --auth-type=cookie --dbname=example --phpmyadmin-user=example --phpmyadmin-password=example --host=http://localhost/phpMyAdmin
     exports example database and save in working directory
@@ -292,6 +297,10 @@ post_params="$post_params&sql_insert_syntax=both"
 post_params="$post_params&sql_max_query_size=50000"
 post_params="$post_params&sql_hex_for_binary=something"
 post_params="$post_params&sql_utc_time=something"
+
+if [ ! -z $add_drop_statement ]; then
+    post_params="$post_params&sql_drop_table=something"
+fi
 
 if [ ! -z $phpmyadmin_server ]; then
     post_params="$post_params&server=$phpmyadmin_server"
