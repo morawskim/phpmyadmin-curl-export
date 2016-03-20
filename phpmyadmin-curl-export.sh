@@ -116,6 +116,7 @@ Arguments: $0 [--help] [--auth-type=<cookie|basic>] [--http-basic-user=<apache_h
        --dbname=<database>: Database to be exported
        --host=<phpmyadmin_host>: PhpMyAdmin host
        --save-to=<%F-\$dbname.sql>: Output filename (support for date format controls eg. %F)
+       --compression: Enable gzip compression
 
  Common uses: $0 --auth-type=cookie --dbname=example --phpmyadmin-user=example --phpmyadmin-password=example --host=http://localhost/phpMyAdmin
     exports example database and save in working directory
