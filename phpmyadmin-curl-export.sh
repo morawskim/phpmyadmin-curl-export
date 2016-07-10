@@ -202,6 +202,17 @@ function phpmyadmin_check_response_code()
     fi
 }
 
+function phpmyadmin_check_content_disposition_header()
+{
+    local content_disposition=$(tac $headers_path | grep Content-Disposition | head -1 | cut -f2 -d' ')
+    if [ $content_disposition == 'attachment;' ]; then
+        return 0
+    else
+        echo "$1">&2
+        exit 2
+    fi
+}
+
 function phpmyadmin_auth()
 {
     case $auth_type in
@@ -321,6 +332,7 @@ curl "$phpmyadmin_host/export.php" \
     --data $post_params
   
 phpmyadmin_check_response_code "Cant dump database $phpmyadmin_dbname"
+phpmyadmin_check_content_disposition_header "Response don't have valid Content-Disposition header"
 
 echo "Save dump database to $save_to"
 echo 'Remove tmp files...'
